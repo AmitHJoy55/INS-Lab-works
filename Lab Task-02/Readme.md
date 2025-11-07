@@ -58,66 +58,90 @@ Here, most frequent character in the cipher text will be replaced with the most 
 
 ### Substitution Cipher Breaker :
 ```py
-def substitution_cipher(cipher_text, english_freq):
+# Checking for frequency distribution 
+def calculate_char_frequency(text):
 
-    sorted_english_freq = dict(sorted(english_freq.items(), key=lambda x : x[1], reverse = True))
+    text = text.lower()
+    char_counts = collections.Counter(c for c in text if c.isalpha())
+    total_alpha_chars = sum(char_counts.values())
 
-    char_freq = {}
-    total = 0
-    # frequency count
-    for char in cipher_text:
-        if char.isalpha():
-            char = char.lower()
-            total += 1
-            char_freq[char] = char_freq.get(char, 0) + 1
+    # Calculate percentages
+    frequencies = [
+        (char, count, (count / total_alpha_chars) * 100)
+        for char, count in char_counts.items()
+    ]
 
-    char_percentage = {}
-    # frequency distribution of cipher text
-    for char, freq in char_freq.items():
-        char_percentage[char] = (freq / total) * 100
+    # Sort by percentage in descending order
+    frequencies.sort(key=lambda x: x[2], reverse=True)
+    return frequencies
 
-    sorted_char_percentage = dict(sorted(char_percentage.items(), key=lambda x : x[1], reverse = True))
+# Calculate frequencies
+freq1_analysis = calculate_char_frequency(CIPHER_1)
+freq2_analysis = calculate_char_frequency(CIPHER_2)
 
-    order = "abcdefghijklmnopqrstuvwxyz"
-    key = order
-    # mapping
-    for char in order:
-        if char in sorted_char_percentage:
-            index = list(sorted_char_percentage.keys()).index(char)
-            char_key = list(sorted_english_freq.keys())[index]
-            key = key.replace(char, char_key)
-    
-    decipher_text = ""
-    for char in cipher_text:
-        if char.isalpha():
-            if char.islower():
-                decipher_text += key[ord(char) - ord('a')]
-            else:
-                decipher_text += key[ord(char) - ord('A')].upper()
-        else:
-            decipher_text += char
+freq1_list = [(char, f'{percentage:.2f}%') for char, count, percentage in freq1_analysis]
+english_freq_list = [(char, f'{percentage:.2f}%') for char, percentage in SORTED_ENGLISH_FREQ]
 
-    print("Key : ", key)
-    print("Deciphered Text :", decipher_text)
+# Determine the maximum length for consistent printing
+max_len = max(len(freq1_list), len(english_freq_list))
 
+for i in range(max_len):
+    cipher_char_info = freq1_list[i] if i < len(freq1_list) else (' ', '      ')
+    eng_char_info = english_freq_list[i] if i < len(english_freq_list) else (' ', '      ')
+    print(f"  '{cipher_char_info[0]}': {cipher_char_info[1].ljust(7)} |   '{eng_char_info[0]}': {eng_char_info[1]}")
 
-english_freq = {
-'a': 8.05, 'b': 1.67, 'c': 2.23, 'd': 5.10, 'e': 12.22, 'f': 2.14, 'g': 2.30, 'h': 6.62, 'i': 6.28, 'j': 0.19, 'k': 0.95, 'l': 4.08, 'm': 2.33, 
-'n': 6.95, 'o': 7.63, 'p': 1.66, 'q': 0.06, 'r': 5.29, 's': 6.02, 't': 9.67, 'u': 2.92, 'v': 0.82, 'w': 2.60, 'x': 0.11, 'y': 2.04, 'z': 0.06
+final_key_map_cipher1 = {
+    'a': 'i', 'c': 't', 'd': 'o', 'e': 'h', 'f': 'n', 'g': 'd', 'h': 'b', 'i': 'e',
+    'j': 'q', 'k': 'r', 'l': 'k', 'm': 'g', 'n': 'l', 'o': 'm', 'p': 'a', 'q': 'c',
+    'r': 's', 's': 'j', 't': 'w', 'u': 'f', 'v': 'u', 'w': 'y', 'x': 'p'
 }
+print("\n--- Final Key Map for Cipher-1 ---")
+for k, v in sorted(final_key_map_cipher1.items()):
+    print(f"'{k}' -> '{v}'")
 
-cipher1 = "af p xpkcaqvnpk pfg, af ipqe qpri, gauuikifc tpw, ceiri udvk tiki afgarxifrphni cd eao-wvmd popkwn, hiqpvri du ear jvaql vfgikrcpfgafm du cei xkafqaxnir du xrwqedearcdkw pfg du ear aopmafpcasi xkdhafmr afcd fit pkipr. ac tpr qdoudkcafm cd lfdt cepc au pfwceafm epxxifig cd ringdf eaorinu hiudki cei opceiopcaqr du cei uaing qdvng hi qdoxnicinw tdklig dvc-pfg edt rndtnw ac xkdqiigig, pfg edt odvfcpafdvr cei dhrcpqnir--ceiki tdvng pc niprc kiopaf dfi mddg oafg cepc tdvng qdfcafvi cei kiripkqe"
+#---------------------------------------------------------#
+# Similarly repeat those step for the second cipher text
 
-
-substitution_cipher(cipher1, english_freq)
 ```
+
+First cipher text : 
+
+```
+af p xpkcaqvnpk pfg, af ipqe qpri, gauuikifc tpw, ceiri udvk tiki afgarxifrphni cd eao--wvmd popkwn, hiqpvri du ear jvaql vfgikrcpfgafm du cei xkafqaxnir du xrwqedearcdkw pfg du ear aopmafpcasi xkdhafmr afcd fit pkipr. ac tpr qdoudkcafm cd lfdt cepc au pfwceafm epxxifig cd ringdf eaorinu hiudki cei opceiopcaqr du cei uaing qdvng hi qdoxnicinw tdklig dvc--pfg edt rndtnw ac xkdqiigig, pfg edt odvfcpafdvr cei dhrcpqnir--ceiki tdvng pc niprc kiopaf dfi mddg oafg cepc tdvng qdfcafvi cei kiripkqe
+
+```
+
+
 
 ### Output : 
 
 ```
-Key :  lbagjodoeyikblcomijgmyyfyz
+--- Final Key Map for Cipher-1 ---
+'a' -> 'i'
+'c' -> 't'
+'d' -> 'o'
+'e' -> 'h'
+'f' -> 'n'
+'g' -> 'd'
+'h' -> 'b'
+'i' -> 'e'
+'j' -> 'q'
+'k' -> 'r'
+'l' -> 'k'
+'m' -> 'g'
+'n' -> 'l'
+'o' -> 'm'
+'p' -> 'a'
+'q' -> 'c'
+'r' -> 's'
+'s' -> 'j'
+'t' -> 'w'
+'u' -> 'f'
+'v' -> 'u'
+'w' -> 'y'
+'x' -> 'p'
 
-Deciphered Text : lo o foialmyloi ood, lo eomj moie, dlmmeieoa goy, ajeie mgyi geie lodlifeoioole ag jlc-yybg ocoiyl, oemoyie gm jli yylmk yodeiiaoodlob gm aje filomlflei gm fiymjgjliagiy ood gm jli lcoblooalje figolobi loag oeg oieoi. la goi mgcmgialob ag kogg ajoa lm ooyajlob joffeoed ag ieldgo jlcielm oemgie aje coajecoalmi gm aje mleld mgyld oe mgcfleaely ggiked gya-ood jgg ilggly la figmeeded, ood jgg cgyoaologyi aje goiaomlei--ajeie ggyld oa leoia iecolo goe bggd clod ajoa ggyld mgoaloye aje ieieoimj
+Deciphered Text : in a particular and, in each case, different way, these four were indispensable to him--yugo amaryl, because of his quick understanding of the principles of psychohistory and of his imaginatije probings into new areas. it was comforting to know that if anything happened to seldon himself before the mathematics of the field could be completely worked out--and how slowly it proceeded, and how mountainous the obstacles--there would at least remain one good mind that would continue the research
 ```
 
 Second cipher text : 
@@ -129,15 +153,50 @@ Second cipher text :
 Output : 
 
 ```
-Key :  edcphfbaidfhmcakgrmfergxpi
+--- Final Key Map for Cipher-2 ---
+'a' -> 'b'
+'b' -> 'x'
+'c' -> 'i'
+'d' -> 'c'
+'e' -> 'l'
+'g' -> 'y'
+'h' -> 'o'
+'i' -> 'j'
+'j' -> 'd'
+'k' -> 't'
+'l' -> 'h'
+'m' -> 'n'
+'n' -> 'g'
+'o' -> 'a'
+'p' -> 'v'
+'q' -> 'u'
+'r' -> 'k'
+'s' -> 'f'
+'t' -> 'w'
+'u' -> 'e'
+'v' -> 'r'
+'w' -> 'm'
+'y' -> 'p'
+'z' -> 's'
 
-Deciphered Text : echea fai kerb rcph amd kerb pepghcar, amd had eeem fhe famder am fhe ihcre mar icdfb beari, eker icmpe hci regarraehe dciappearampe amd gmedpepfed refgrm. fhe rcphei he had eragchf eapr mrag hci frakehi had maf eepage a hapah hecemd, amd cf fai papgharhb eehceked, fhafeker fhe ahd mahr gcchf iab, fhaf fhe hchh af eac emd fai mghh am fgmmehi ifgmmed fcfh freaigre. amd cm fhaf fai maf emagch mar mage, fhere fai ahia hci prahamced kccagr fa garkeh af. fcge fare am, egf cf ieeged fa hake hcffhe emmepf am gr. eacccmi. af mcmefb he fai ggph fhe iage ai af mcmfb. af mcmefb-mcme fheb eecam fa pahh hcg fehh-preierked; egf gmphamced faghd hake eeem mearer fhe garr. fhere fere iage fhaf ihaar fhecr headi amd fhagchf fhci fai faa ggph am a caad fhcmc; cf ieeged gmmacr fhafambame ihaghd paiieii (apparemfhb) perpefgah bagfh ai fehh ai (repgfedhb) cmedhagifcehe feahfh. cf fchh hake fa ee pacd mar, fheb iacd. cf cim'f mafgrah, amd fragehe fchh page am cf! egf ia mar fragehe had maf page; amd ai gr. eacccmi fai cemeragi fcfh hci gameb, gaif peaphe fere fchhcmc fa marccke hcg hci addcfcei amd hci caad marfgme. he regacmed am kcicfcmc fergi fcfh hci rehafckei (edpepf, am pagrie, fhe iaprkchhe- eacccmiei), amd he had gamb dekafed adgcreri agamc fhe haeecfi am paar amd gmcgparfamf magchcei. egf he had ma phaie mrcemdi, gmfch iage am hci bagmcer pagicmi eecam fa craf gp. fhe ehdeif am fheie, amd echea'i makagrcfe, fai bagmc mrada eacccmi. fhem echea fai mcmefb-mcme he adapfed mrada ai hci hecr, amd eragchf hcg fa hcke af eac emd; amd fhe hapei am fhe iaprkchhe- eacccmiei fere mcmahhb daihed. echea amd mrada happemed fa hake fhe iage ecrfhdab, iepfegeer 22md. bag had eeffer page amd hcke here, mrada gb had, iacd echea ame dab; amd fhem fe pam peheerafe agr ecrfhdab-parfcei pagmarfaehb facefher. af fhaf fcge mrada fai ifchh cm hci ffeemi, ai fhe haeecfi pahhed fhe crreipamicehe ffemfcei eeffeem phchdhaad amd pagcmc am ace af fhcrfb-fhree
+Deciphered Text : bilbo was very rich and very peculiar, and had been the wonder of the shire for sixty years, ever since his remarkable disappearance and unexpected return. the riches he had brought back from his travels had now become a local legend, and it was popularly believed, whatever the old folk might say, that the hill at bag end was full of tunnels stuffed with treasure. and if that was not enough for fame, there was also his prolonged vigour to marvel at. time wore on, but it seemed to have little effect on mr. baggins. at ninety he was much the same as at fifty. at ninety-nine they began to call him well-preserved; but unchanged would have been nearer the mark. there were some that shook their heads and thought this was too much of a good thing; it seemed unfair that anyone should possess (apparently) perpetual youth as well as (reputedly) inexhaustible wealth. it will have to be paid for, they said. it isn't natural, and trouble will come of it! but so far trouble had not come; and as mr. baggins was generous with jis money, most people were willing to forgive him jis oddities and jis good fortune. he remained on visiting terms with jis relatives (except, of course, the sackville- bagginses), and he had many devoted admirers among the hobbits of poor and unimportant families. but he had no close friends, until some of jis younger cousins began to grow up. the eldest of these, and bilbo's favourite, was young frodo baggins. when bilbo was ninety-nine he adopted frodo as jis heir, and brought jim to live at bag end; and the hopes of the sackville- bagginses were finally dashed. bilbo and frodo happened to have the same birthday, september 22nd. you had better come and live here, frodo my lad, said bilbo one day; and then we can celebrate our birthday-parties comfortably together. at that time frodo was still in jis tweens, as the hobbits called the irresponsible twenties between childhood and coming of age at thirty-three
+
 ```
 
 ### Observation:
 
-In second cipher text, some words can be recognized such as `had`, `he`, `here`, `bag` etc.
+The **second cipher** is easier to break.
 
-So, second cipher is more likely to be broken.
+**Why (short reasons):**
+- It contains many **short repeated words** (e.g. `omj`, `klu`, `toz`, `ok`, `ck`) that map cleanly to high-frequency function words like **"the", "and", "to", "of", "be"**, which gives strong starting points for substitution.
+- There are **recognizable word patterns and endings** (repeated suffixes, apostrophe forms like `czm'k`) that suggest common English forms (`n't`, `'s`, etc.), helping rapid pattern matching.
+- The text has **clear sentence structure and punctuation**, providing context to confirm guesses (capitalization, commas, parentheses, numbers like `22mj`), so trial mappings can be validated against many occurrences.
+- Frequency ranks in cipher-2 more closely match English letter-frequency order, so a frequency-analysis initial key yields readable fragments quickly.
 
-But the given cipher could not be broken. One reason maybe the need of more complex algorithm to break the cipher and more data apart from frequency distribution.
+**Why cipher-1 is harder:**
+- It has many **longer, less-repetitive tokens** and hyphenated compounds that obscure common function-word positions.
+- Fewer obvious short-word anchors and more varied letter clusters make frequency-based guesses less reliable.
+- More noise for contextual confirmation, so manual refinement after a frequency guess is much harder.
+
+**Conclusion:** Cipher-2 is more likely to be broken by simple frequency analysis + pattern matching; Cipher-1 is harder and would require more advanced techniques or more ciphertext/context.
+
